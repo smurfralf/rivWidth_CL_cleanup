@@ -93,17 +93,6 @@ if n_elements(rivPaths) ne nWpaths or n_elements(rivHdrsPaths) ne nWpaths $
 
 tm = systime(1)
 
-
-
-
-
-
-
-
-
-
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
 ; run the gap filler routine on each mosaic image:  
 
@@ -119,7 +108,6 @@ print, "Opening file: " + wPaths[h] + "..."
 envi_open_file, rivPaths[h], /no_interactive_query
 envi_open_file, wPaths[h], /no_interactive_query
 
-
 ; read in river mask:
 rivHdr = read_envi_hdr(rivHdrsPaths[h])
 rImg = read_binary(rivPaths[h], data_dims=[rivHdr.samples, rivHdr.lines], data_type=1)
@@ -132,7 +120,6 @@ wImg = read_binary(wPaths[h], data_dims=[rivHdr.samples, rivHdr.lines], data_typ
 print,  n_elements(histogram(wImg))
 if n_elements(histogram(wImg)) lt 2 then print, "No RivWidth centerline! Skipping tile..."
 if n_elements(histogram(wImg)) lt 2 then continue
-
 
 ; find image dimensions:
 width = wHdr.samples
@@ -208,7 +195,6 @@ subCoord = arraySubsetter(EPall, subWinSize, width, height)
 ;xyouts, EPall[0,*]/imgSize, (height-EPall[1,*])/imgSize, txt, alignment=1, charsize=.5, /device
 
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Connect endpoints
 
@@ -268,7 +254,6 @@ for i = 14s, n_elements(subCoord[0,*])-1 do begin
   wDist = replicate(0, n_elements(CPind))
   for j = 0, n_elements(wDist)-1 do wDist(j) = max(rDist[sCoord[0,j]:sCoord[2,j]-1, sCoord[1,j]:sCoord[3,j]-1])
 
-
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ; for each nearby centerline, find the mean width of an area around the closest pixels: 
 ;  wDist = replicate(0, n_elements(CPind))
@@ -292,10 +277,10 @@ for i = 14s, n_elements(subCoord[0,*])-1 do begin
   
   ; if wDist + constant > dist then nearby width, then skip to next endpoint:
   if minDist gt 0 then continue
-  
 
   closestP = where(normDist eq minDist, /null)
   CP = CPs[*, closestP]
+  
   
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ; final subset based on the distance between CP and EP: 
@@ -344,12 +329,6 @@ for i = 14s, n_elements(subCoord[0,*])-1 do begin
   wImg[sCoord[0]:sCoord[2]-1, sCoord[1]:sCoord[3]-1] = gapFill
 
 endfor
-
-
-
-
-
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -474,14 +453,8 @@ if n_elements(invRegHist) ge 2 then begin
 endif
 
 
-
-
-
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Centerline clean up:
-
 
 ; remove pixels that do not preserve connectivity or short spurs:
 
@@ -504,6 +477,7 @@ if tripPts[0] ne -1 then begin
     wImg[tsC[0,i]:tsC[2,i]-1, tsC[1,i]:tsC[3,i]-1] = sub
   endfor
 endif
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; remove any uncessary pixels:
@@ -528,8 +502,6 @@ for i = 0, n_elements(cLinePx)-1 do begin
 endfor 
 
 
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; remove short (e.g. <10 km) centerline spurs by removing triple points, and counting pixels of 
 ;  regions that touch an endpoint:
@@ -545,7 +517,6 @@ if tripPts[0] ne -1 then begin
   wByte(EPall) = 1
   wByte = dilate(wByte, kernel1)
 
-  
   ; remove short spurs (small regions) that contain endpoints:
   minSpurSize = 333 ;n px
   EPregHist = histogram(regs(where(regs gt 0 and wByte eq 1)), min=0, max=max(regs))
@@ -555,6 +526,7 @@ if tripPts[0] ne -1 then begin
   spurReg = histInd(where(nPixEndPtReg lt minSpurSize and nPixEndPtReg gt 0, /null))
   for i = 0, n_elements(spurReg)-1 do wImg(where(regs eq spurReg(i))) = 0
 endif
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; remove any uncessary pixels again:
@@ -589,7 +561,6 @@ if smallReg ne !null then print, "Removing very small regions..."
 for i = 0, n_elements(smallReg)-1 do wImg(where(regs eq smallReg(i), /null)) = 0
 
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; write out connected width image:
 ;x = wImg & fName = 'gapFilled'
@@ -597,9 +568,6 @@ for i = 0, n_elements(smallReg)-1 do wImg(where(regs eq smallReg(i), /null)) = 0
 ;envi_open_file, outDir+strtrim(string(h),1)+fNames(h)+'_'+fName+'.tif', /no_interactive_query
 
 TOC
-
-
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -623,7 +591,6 @@ outshape->addAttribute, 'segmentID', 3, 7, precision=0
 outshape->addAttribute, 'segmentInd', 3, 7, precision=0
 
 entcounter = 0l
-
 
 ; organize river segments and triple points:
 
@@ -804,11 +771,7 @@ for i = 0, n_elements(sortReg)-1 do begin
 
   endfor
   
-  
 endfor
-
-
-
 
 
 ; create prj file for shapefile:
@@ -820,7 +783,6 @@ free_lun, lun
 
 print, "Completed mosaic: " + fNames(h)
 
-
 obj_destroy, outshape
 
 TOC
@@ -828,9 +790,6 @@ TOC
 print, "Finished in (seconds): ", systime(1) - tm
 
 endfor
-
-
-
 
 end
 
