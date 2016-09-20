@@ -19,35 +19,6 @@ pro cLineGapFiller_v2_trimmer
 ;Modified RivWidth width image:
 ;gaps filled (gapfill pixel DN=1)
 ;short spurs removed (e.g. river segments less than 100 px)
-;
-;Output files are written to a specified directory with a file name that contains the original w_image name.
-;
-;Routine:
-;read input files
-;calculate widths of river mask
-;label regions of river mask
-;fill in centerline gaps
-; find centerline endpoints of width image
-; subset around each centerline with a window size equal to the max width of the river mask
-; if there is only one width centerline region, skip to next endpoint
-; for each width centerline region other than the given endpoint region, find the closest pixel
-; take a small subset (21 px) around each closest pixel and calculate the average width of the river mask centerline
-; determine which is the best point for the endpoint to be connected to based on the width of each connecting points and their distance to the endpoint
-; if there are no connecting points that have a high width to distance ratio, skip to the next endpoint
-; subset around endpoint with a window size based on the distance between the endpoint and the connecting point
-; label regions of the subset river mask. If the endpoint and connecting point exist in different regions then skip to the next endpoint
-; connect endpoint to connection point with a single pixel line where DN=1
-;remove duplicated lines by inverting width image and labeling regions
-; fill regions less than 3 pixels (they will be thinned down later)
-; for regions greater than 3 pixels, subset the islands
-;   remove triple points from width centerline and label regions
-;   if there are centerline pixels outside of the river mask, remove the region with the most centerline pixels outside the river mask
-;   if there are no pixels outside the river mask (or multiple regions with an equal number of pixels outside the river mask), then remove the largest centerline region
-; remove all triple point pixels that do not necessarily preserve connectivity
-;remove any pixels that do not necessarily preserve connectivity
-;remove any short centerline spurs that contain an endpoint
-;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
